@@ -3,37 +3,147 @@
 <head>
 <meta charset="utf-8">
 <title>ЗаявОчки</title>
+
+<style>
+body {
+    margin: 0;
+    font-family: Arial;
+    background: rgba(0, 0, 0, 0.61);
+}
+
+/* header */
+.header {
+    display:flex;
+    justify-content:space-between;
+    align-items:center;
+    background: rgb(255, 255, 255);
+    padding:10px 20px;
+}
+
+/* контейнер */
+.container {
+    padding:20px;
+}
+
+/* карточка */
+.ticket {
+    background:white;
+    border-radius:15px;
+    padding:15px;
+    margin-bottom:15px;
+    position:relative;
+}
+
+/* кнопка */
+button {
+    margin-top:10px;
+    background:#ff4d4d;
+    border:none;
+    color:white;
+    padding:6px 12px;
+    border-radius:10px;
+    cursor:pointer;
+}
+
+@keyframes explode {
+    0% {transform:scale(1); opacity:1;}
+    100% {transform:scale(20); opacity:0;}
+}
+</style>
 </head>
 
 <body>
 
-<div style="display:flex; justify-content:space-between; align-items:center; background:#f2f2f2; padding:10px;">
+<div class="header">
     <b>Оператор: {{ name }}</b>
-    <a href="/logout">Выйти</a>
+    <a href="/logout">
+    <img src="/static/logout.png" class="logout-icon">
+</a>
 </div>
 
-<h2>Новые заявки</h2>
+<div class="container">
+
+<h2 style="color:white;">Новые заявки</h2>
 
 <div id="tickets">
 
 {% for t in tickets %}
-
-<div id="ticket-{{t.id}}">
+<div class="ticket" id="ticket-{{t.id}}">
 <pre>{{t.text}}</pre>
 
 <button onclick="closeTicket({{t.id}})">
 Закрыть
 </button>
-
-<hr>
-
 </div>
-
 {% endfor %}
 
 </div>
 
-<script src="/static/main.js"></script>
+</div>
+
+<script>
+/* WebSocket */
+const ws = new WebSocket("ws://" + location.host + "/ws");
+
+/* уведомления */
+if (Notification.permission !== "granted") {
+    Notification.requestPermission();
+}
+
+ws.onmessage = function(event) {
+    const data = JSON.parse(event.data);
+
+    // 🟢 новая заявка
+    if (data.type === "new_ticket" || (!data.type && data.text)) {
+
+        const container = document.getElementById("tickets");
+
+        const div = document.createElement("div");
+        div.className = "ticket";
+        div.id = "ticket-" + data.id;
+
+        div.innerHTML = `
+            <pre>${data.text}</pre>
+            <button onclick="closeTicket(${data.id})">Закрыть</button>
+        `;
+
+        container.prepend(div);
+
+        // 🔔 уведомление
+        if (Notification.permission === "granted") {
+            new Notification("", {
+                body: data.text
+            });
+        }
+    }
+
+    // 🔴 закрытие заявки
+    if (data.type === "close_ticket") {
+        const el = document.getElementById("ticket-" + data.id);
+        if (el) {
+            el.remove();
+        }
+    }
+};
+
+/* закрытие */
+function closeTicket(id) {
+    const el = document.getElementById("ticket-" + id);
+    if (!el) return;
+
+    // отправка запроса на сервер
+    fetch("/api/request/" + id, { method: "DELETE" })
+        .then(response => {
+            if (response.ok) {
+                // удаляем карточку только если сервер подтвердил
+                el.remove();
+            } else {
+                console.error("Не удалось закрыть заявку", response.status);
+            }
+        })
+        .catch(err => console.error("Ошибка запроса:", err));
+}
+</script>
 
 </body>
 </html>

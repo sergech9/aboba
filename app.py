@@ -99,16 +99,16 @@ def dashboard(request: Request, db: Session = Depends(get_db)):
 
 @app.post("/api/request")
 async def create_ticket(ticket: TicketCreate, db: Session = Depends(get_db), _: None = Depends(verify_api_key)):
-    t = models.Ticket(text=ticket.text)
-    db.add(t)
+    ticket = models.Ticket(text=ticket.text)
+    db.add(ticket)
     db.commit()
-    db.refresh(t)
+    db.refresh(ticket)
 
     for ws in connections:
         await ws.send_json({
             "type": "new_ticket",
-            "id": t.id,
-            "text": t.text
+            "id": ticket.id,
+            "text": ticket.text
         })
 
     return {"status": "ok"}

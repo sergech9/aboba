@@ -1,17 +1,155 @@
 <!DOCTYPE html>
-<html>
+<html lang="ru">
 <head>
-    <title>Login</title>
+    <meta charset="UTF-8">
+    <title>Авторизация</title>
+
+    <style>
+        body {
+            margin: 0;
+            height: 100vh;
+            font-family: Arial, sans-serif;
+            background: rgba(0, 0, 0, 0.61);
+            display: flex;
+            justify-content: center;
+            align-items: center;
+        }
+
+        .card {
+            background: #ffffff;
+            padding: 40px;
+            border-radius: 20px;
+            width: 320px;
+        }
+
+        h2 {
+            text-align: center;
+            margin-bottom: 25px;
+        }
+
+        label {
+            display: block;
+            margin-top: 15px;
+            font-size: 14px;
+        }
+
+        input {
+            width: 100%;
+            padding: 10px;
+            margin-top: 5px;
+            border-radius: 8px;
+            border: 1px solid #ccc;
+            font-size: 14px;
+        }
+
+        button {
+            width: 100%;
+            margin-top: 25px;
+            padding: 12px;
+            border: none;
+            border-radius: 20px;
+            background: #333;
+            color: white;
+            font-size: 14px;
+            cursor: pointer;
+        }
+
+        button:hover {
+            background: #555;
+        }
+
+        .links {
+            margin-top: 15px;
+            text-align: center;
+            font-size: 13px;
+        }
+
+        .links a {
+            color: #333;
+            text-decoration: none;
+            margin: 0 5px;
+            cursor: pointer;
+        }
+
+        .error {
+            color: red;
+            text-align: center;
+            margin-bottom: 10px;
+        }
+
+        /* Модалка */
+        .modal {
+            display: none;
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0,0,0,0.5);
+            justify-content: center;
+            align-items: center;
+        }
+
+        .modal-content {
+            background: white;
+            padding: 30px;
+            border-radius: 15px;
+            text-align: center;
+        }
+
+        .close-btn {
+            margin-top: 15px;
+            padding: 8px 20px;
+            border: none;
+            border-radius: 10px;
+            background: #333;
+            color: white;
+            cursor: pointer;
+        }
+    </style>
 </head>
+
 <body>
-<h2>Login</h2>
-{% if error %}
-<p style="color:red">{{ error }}</p>
-{% endif %}
-<form method="post">
-    Login: <input type="text" name="login"><br>
-    Password: <input type="password" name="password"><br>
-    <button type="submit">Login</button>
-</form>
+
+<div class="card">
+    <h2>Авторизация</h2>
+
+    {% if error %}
+    <div class="error">{{ error }}</div>
+    {% endif %}
+
+    <form method="post">
+        <label>Логин</label>
+        <input type="text" name="login" placeholder="Введите логин">
+
+        <label>Пароль</label>
+        <input type="password" name="password" placeholder="Введите пароль">
+
+        <button type="submit">Войти</button>
+    </form>
+
+    <div class="links">
+        <a onclick="openModal()">Забыли пароль?</a>
+    </div>
+</div>
+
+<!-- МОДАЛКА -->
+<div class="modal" id="modal">
+    <div class="modal-content">
+        <h3>Жаль(</h3>
+        <button class="close-btn" onclick="closeModal()">Закрыть</button>
+    </div>
+</div>
+
+<script>
+    function openModal() {
+        document.getElementById("modal").style.display = "flex";
+    }
+
+    function closeModal() {
+        document.getElementById("modal").style.display = "none";
+    }
+</script>
+
 </body>
 </html>
